@@ -1,14 +1,13 @@
 const sendButton = document.querySelector("#sendButton");
+const inputText = document.querySelector("#inputText");
+const messagesContainer = document.querySelector(".chat__messages");
 
-sendButton.addEventListener("click", async () => {
-  const inputText = document.querySelector("#inputText");
+const sendMessage = async () => {
   const myMessage = inputText.value.trim();
 
   if (!myMessage) {
     return false;
   }
-
-  const messagesContainer = document.querySelector(".chat__messages");
 
   messagesContainer.innerHTML += `<div class="chat__message chat__message--user">Yo: ${myMessage}</div>`;
 
@@ -34,4 +33,12 @@ sendButton.addEventListener("click", async () => {
     console.error("Error:", error);
   }
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+};
+
+sendButton.addEventListener("click", sendMessage);
+inputText.addEventListener("keypress", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    sendMessage();
+  }
 });
