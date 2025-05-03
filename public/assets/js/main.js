@@ -33,5 +33,5 @@ sendButton.addEventListener("click", async () => {
   } catch (error) {
     console.error("Error:", error);
   }
-  chatContainer.scrollTop = chatContainer.scrollHeight;
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
