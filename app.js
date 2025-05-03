@@ -39,14 +39,7 @@ app.post("/api/chatbot", async (req, res) => {
   }
 
   if (!conversations[userId]) {
-    conversations[userId] = [
-      { role: "system", content: contexto },
-      {
-        role: "system",
-        content:
-          "Debes responder de la forma mas corta y directa posible, usando los minimos tokens posibles.",
-      },
-    ];
+    conversations[userId] = [];
   }
 
   conversations[userId].push({ role: "user", content: message });
@@ -54,7 +47,15 @@ app.post("/api/chatbot", async (req, res) => {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: conversations[userId],
+      messages: [
+        { role: "system", content: contexto },
+        {
+          role: "system",
+          content:
+            "Debes responder de la forma mas corta y directa posible, usando los minimos tokens posibles.",
+        },
+        ...conversations[userId],
+      ],
       max_tokens: 200,
     });
 
