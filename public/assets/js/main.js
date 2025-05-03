@@ -1,6 +1,7 @@
 const sendButton = document.querySelector("#sendButton");
 const inputText = document.querySelector("#inputText");
 const messagesContainer = document.querySelector(".chat__messages");
+const userId = Date.now() + Math.floor(Math.random() * 1000);
 
 const sendMessage = async () => {
   const myMessage = inputText.value.trim();
@@ -19,7 +20,7 @@ const sendMessage = async () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ message: myMessage }),
+      body: JSON.stringify({ message: myMessage, userId }),
     });
 
     if (!response.ok) {

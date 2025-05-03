@@ -18,8 +18,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-app.post("/api/chatbot", async (req, res) => {
-  const contexto = `
+const contexto = `
     Eres un asistente de soporte para el supermercado "Dieguidev".
     Información del negocio:
       - Ubicacion: Calle 2 s/n, El Agustino, Peru
@@ -30,27 +29,44 @@ app.post("/api/chatbot", async (req, res) => {
     Solo puedes responder preguntas sobre la tienda. Cualquier otra pregunta esta prohibida.
   `;
 
-  const { message } = req.body;
+let conversations = {};
+
+app.post("/api/chatbot", async (req, res) => {
+  const { userId, message } = req.body;
+
   if (!message) {
     return res.status(400).json({ error: "Message is required" });
   }
 
+  if (!conversations[userId]) {
+    conversations[userId] = [
+      { role: "system", content: contexto },
+      {
+        role: "system",
+        content:
+          "Debes responder de la forma mas corta y directa posible, usando los minimos tokens posibles.",
+      },
+    ];
+  }
+
+  conversations[userId].push({ role: "user", content: message });
+
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: contexto },
-        {
-          role: "system",
-          content:
-            "Debes responder de la forma mas corta y directa posible, usando los minimos tokens posibles.",
-        },
-        { role: "user", content: message },
-      ],
+      messages: conversations[userId],
       max_tokens: 200,
     });
 
     const reply = response.choices[0].message.content;
+
+    conversations[userId].push({ role: "assistant", content: reply });
+
+    if (conversations[userId].length > 12) {
+      conversations[userId] = conversations[userId].slice(-10);
+    }
+
+    console.log("Conversacion: ", conversations[userId]);
 
     return res.json({ reply });
   } catch (error) {
