@@ -29,6 +29,34 @@ app.post("/api/chatbot", async (req, res) => {
       - Metodos de pago: Efectivo, Visa, Mastercard, American Express
     Solo puedes responder preguntas sobre la tienda. Cualquier otra pregunta esta prohibida.
   `;
+
+  const { message } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: contexto },
+        {
+          role: "system",
+          content:
+            "Debes responder de la forma mas corta y directa posible, usando los minimos tokens posibles.",
+        },
+        { role: "user", content: message },
+      ],
+      max_tokens: 200,
+    });
+
+    const reply = response.choices[0].message.content;
+
+    return res.json({ reply });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.listen(PORT, () => {
